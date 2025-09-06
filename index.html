@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Learning App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab.active {
+            color: #4facfe;
+            background: white;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .text-area {
+            width: 100%;
+            height: 300px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            font-size: 16px;
+            line-height: 1.6;
+            resize: vertical;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .text-area:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .reading-text {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 300px;
+            font-size: 16px;
+            line-height: 1.8;
+            user-select: text;
+            cursor: text;
+        }
+
+        .highlighted {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 2px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .highlighted:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .popup {
+            position: absolute;
+            background: white;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 20px;
+            z-index: 1000;
+            max-width: 300px;
+            display: none;
+        }
+
+        .popup::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid white;
+        }
+
+        .popup-text {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .popup-translation {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(86, 171, 47, 0.4);
+        }
+
+        .audio-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ffa8a8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .audio-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        .dictionary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .dictionary-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dictionary-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .dictionary-item h3 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .dictionary-item p {
+            opacity: 0.9;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .flashcard {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 400px;
+            height: 250px;
+            margin: 20px auto;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .flashcard:hover {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front,
+        .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .flashcard-back {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+            transform: rotateY(180deg);
+        }
+
+        .flashcard h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .flashcard p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .flashcard-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #4facfe;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h3 {
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .flashcard {
+                width: 320px;
+                height: 200px;
+            }
+            
+            .dictionary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Language Learning App</h1>
+            <p>Highlight, translate, and master new words with flashcards</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="tab active" data-tab="reader">📖 Text Reader</button>
+            <button class="tab" data-tab="dictionary">📚 My Dictionary</button>
+            <button class="tab" data-tab="flashcards">🎯 Flashcards</button>
+        </div>
+
+        <div id="reader" class="tab-content active">
+            <div class="instructions">
+                <h3>Как использовать:</h3>
+                <p>1. Вставьте любой текст ниже<br>2. Выделите ЛЮБУЮ фразу, предложение или слово<br>3. Получите перевод <br>4. Добавляйте в словарь и практикуйтесь!</p>
+            </div>
+            
+            <div class="text-controls" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-primary" id="pasteBtn">📋 Вставить текст</button>
+                <button class="btn btn-secondary" id="clearBtn">🗑️ Очистить текст</button>
+                <button class="btn btn-success" id="editBtn">✏️ Редактировать</button>
+                <button class="btn btn-primary" id="saveBtn" style="display: none;">💾 Сохранить</button>
+            </div>
+            
+            <textarea class="text-area" placeholder="Paste your text here to start learning..."></textarea>
+            <div class="reading-text"></div>
+        </div>
+
+        <div id="dictionary" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #333;">My Dictionary</h2>
+            <div class="dictionary-grid" id="dictionaryGrid">
+                <div class="empty-state">
+                    <h3>Your dictionary is empty</h3>
+                    <p>Start highlighting words in the Text Reader to build your personal dictionary!</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="flashcards" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #333;">Practice Flashcards</h2>
+            <div id="flashcardContainer">
+                <div class="empty-state">
+                    <h3>No flashcards available</h3>
+                    <p>Add some words to your dictionary first to start practicing!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" id="popup">
+        <div class="popup-text" id="popupText"></div>
+        <div class="popup-translation" id="popupTranslation"></div>
+        <div class="popup-buttons">
+            <button class="audio-btn" id="audioBtn" title="Listen">🔊</button>
+            <button class="btn btn-success" id="addToDict">+ Add to Dictionary</button>
+            <button class="btn btn-secondary" id="closePopup">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Multiple translation API implementation
+        const translationCache = {};
+
+        // App state
+        let dictionary = [];
+        let currentFlashcard = 0;
+        let selectedText = '';
+        let selectedRange = null;
+
+        // Improved translation function with multiple APIs
+        async function getTranslation(text, targetLang = 'ru') {
+            if (!text || text.trim().length === 0) return '';
+            
+            const cacheKey = `${text}-${targetLang}`;
+            
+            // Check cache first
+            if (translationCache[cacheKey]) {
+                return translationCache[cacheKey];
+            }
+
+            // Try multiple translation methods
+            const methods = [
+                () => translateWithDeepL(text, targetLang),
+                () => translateWithLibreTranslate(text, targetLang),
+                () => translateWithMyMemory(text, targetLang),
+                () => translateWithFreeAPI(text, targetLang)
+            ];
+
+            for (const method of methods) {
+                try {
+                    const translation = await method();
+                    if (translation && translation !== text && !translation.includes('[API')) {
+                        translationCache[cacheKey] = translation;
+                        return translation;
+                    }
+                } catch (error) {
+                    console.log('Translation method failed, trying next...');
+                }
+            }
+
+            // Enhanced fallback dictionary
+            return getEnhancedFallback(text);
+        }
+
+        // Method 1: DeepL API (best quality)
+        async function translateWithDeepL(text, targetLang) {
+            try {
+                // Method 1: Try Lingva (DeepL-based free service)
+                const response = await fetch(
+                    `https://lingva.ml/api/v1/en/${targetLang}/${encodeURIComponent(text)}`
+                );
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.translation && data.translation !== text) {
+                        return data.translation;
+                    }
+                }
+            } catch (error) {
+                // Method 2: Try alternative DeepL proxy
+                try {
+                    const response = await fetch(
+                        `https://api.allorigins.win/get?url=${encodeURIComponent(
+                            `https://lingva.ml/api/v1/en/${targetLang}/${encodeURIComponent(text)}`
+                        )}`
+                    );
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const result = JSON.parse(data.contents);
+                        if (result.translation && result.translation !== text) {
+                            return result.translation;
+                        }
+                    }
+                } catch (fallbackError) {
+                    throw error;
+                }
+                throw error;
+            }
+        }
+
+        // Method 2: LibreTranslate API (free)
+        async function translateWithLibreTranslate(text, targetLang) {
+            try {
+                const response = await fetch('https://libretranslate.de/translate', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        q: text,
+                        source: 'en',
+                        target: targetLang,
+                        format: 'text'
+                    }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.translatedText;
+                }
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        // Method 3: MyMemory API (free)
+        async function translateWithMyMemory(text, targetLang) {
+            try {
+                const response = await fetch(
+                    `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.responseData && data.responseData.translatedText) {
+                        const translation = data.responseData.translatedText;
+                        // Check if it's a valid translation
+                        if (translation.toLowerCase() !== text.toLowerCase()) {
+                            return translation;
+                        }
+                    }
+                }
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        // Method 4: Free Google Translate API proxy
+        async function translateWithFreeAPI(text, targetLang) {
+            try {
+                const response = await fetch(
+                    `https://api.allorigins.win/get?url=${encodeURIComponent(
+                        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`
+                    )}`
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const parsed = JSON.parse(data.contents);
+                    
+                    if (parsed && parsed[0] && parsed[0][0] && parsed[0][0][0]) {
+                        return parsed[0][0][0];
+                    }
+                }
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        function getEnhancedFallback(text) {
+            const enhancedDict = {
+                // Basic words
+                'hello': 'привет', 'hi': 'привет', 'world': 'мир', 'book': 'книга',
+                'house': 'дом', 'water': 'вода', 'food': 'еда', 'love': 'любовь',
+                'friend': 'друг', 'family': 'семья', 'beautiful': 'красивый',
+                'good': 'хороший', 'bad': 'плохой', 'big': 'большой', 'small': 'маленький',
+                'yes': 'да', 'no': 'нет', 'thank you': 'спасибо', 'please': 'пожалуйста',
+                'time': 'время', 'day': 'день', 'night': 'ночь', 'morning': 'утро',
+                'evening': 'вечер', 'today': 'сегодня', 'tomorrow': 'завтра', 'yesterday': 'вчера',
+                'work': 'работа', 'school': 'школа', 'student': 'студент', 'teacher': 'учитель',
+                'mother': 'мать', 'father': 'отец', 'child': 'ребенок', 'children': 'дети',
+                'man': 'мужчина', 'woman': 'женщина', 'people': 'люди', 'person': 'человек',
+                'car': 'машина', 'city': 'город', 'country': 'страна', 'street': 'улица',
+                'money': 'деньги', 'buy': 'покупать', 'sell': 'продавать', 'price': 'цена',
+                'eat': 'есть', 'drink': 'пить', 'sleep': 'спать', 'walk': 'идти',
+                'run': 'бежать', 'sit': 'сидеть', 'stand': 'стоять', 'think': 'думать',
+                'know': 'знать', 'understand': 'понимать', 'speak': 'говорить', 'listen': 'слушать',
+                'read': 'читать', 'write': 'писать', 'learn': 'учить', 'study': 'изучать',
+                'play': 'играть', 'watch': 'смотреть', 'see': 'видеть', 'look': 'смотреть',
+                'come': 'приходить', 'go': 'идти', 'leave': 'уходить', 'stay': 'оставаться',
+                'give': 'давать', 'take': 'брать', 'get': 'получать', 'have': 'иметь',
+                'want': 'хотеть', 'need': 'нуждаться', 'like': 'нравиться', 'feel': 'чувствовать',
+                'happy': 'счастливый', 'sad': 'грустный', 'angry': 'злой', 'tired': 'усталый',
+                'hot': 'горячий', 'cold': 'холодный', 'warm': 'теплый', 'cool': 'прохладный',
+                'fast': 'быстрый', 'slow': 'медленный', 'easy': 'легкий', 'difficult': 'трудный',
+                'important': 'важный', 'interesting': 'интересный', 'boring': 'скучный',
+                
+                // App-specific terms
+                'language': 'язык', 'learning': 'изучение', 'welcome': 'добро пожаловать',
+                'tool': 'инструмент', 'helps': 'помогает', 'help': 'помощь',
+                'new': 'новый', 'vocabulary': 'словарь', 'practice': 'практика',
+                'flashcards': 'карточки', 'interactive': 'интерактивный',
+                'fun': 'веселье', 'effective': 'эффективный', 'journey': 'путешествие',
+                'translation': 'перевод', 'translate': 'переводить', 'text': 'текст',
+                'word': 'слово', 'sentence': 'предложение', 'phrase': 'фраза',
+                'meaning': 'значение', 'definition': 'определение', 'example': 'пример',
+                
+                // Common phrases
+                'welcome to': 'добро пожаловать в',
+                'language learning': 'изучение языка',
+                'this tool': 'этот инструмент',
+                'helps you': 'помогает вам',
+                'learn new': 'изучать новые',
+                'by highlighting': 'выделяя',
+                'words and phrases': 'слова и фразы',
+                'you can': 'вы можете',
+                'select any': 'выберите любой',
+                'to see': 'чтобы увидеть',
+                'translation feature': 'функцию перевода',
+                'in action': 'в действии',
+                'try selecting': 'попробуйте выбрать',
+                'add to': 'добавить в',
+                'your dictionary': 'ваш словарь',
+                'practice them': 'практиковать их',
+                'using flashcards': 'используя карточки',
+                'makes learning': 'делает изучение',
+                'start by': 'начните с',
+                'highlighting any': 'выделения любого',
+                'word in': 'слова в',
+                'this text': 'этом тексте',
+                'to begin': 'чтобы начать',
+                'how are you': 'как дела',
+                'what is': 'что такое',
+                'where is': 'где находится',
+                'how much': 'сколько стоит',
+                'i want': 'я хочу',
+                'i need': 'мне нужно',
+                'i like': 'мне нравится',
+                'i think': 'я думаю',
+                'excuse me': 'извините',
+                'i\'m sorry': 'извините',
+                'see you later': 'увидимся позже',
+                'good morning': 'доброе утро',
+                'good evening': 'добрый вечер',
+                'good night': 'спокойной ночи'
+            };
+
+            const lowerText = text.toLowerCase().trim();
+            
+            // Check for exact match
+            if (enhancedDict[lowerText]) {
+                return enhancedDict[lowerText];
+            }
+            
+            // Try word-by-word translation for longer phrases
+            const words = lowerText.split(' ');
+            if (words.length > 1) {
+                let hasTranslation = false;
+                const translated = words.map(word => {
+                    const cleanWord = word.replace(/[^\w]/g, '');
+                    if (enhancedDict[cleanWord]) {
+                        hasTranslation = true;
+                        return enhancedDict[cleanWord];
+                    }
+                    return word;
+                }).join(' ');
+                
+                if (hasTranslation) {
+                    return translated;
+                }
+            }
+            
+            // Return with API unavailable message
+            return `${text} [API недоступен]`;
+        }
+
+        // Text-to-speech function
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                const tabId = tab.dataset.tab;
+                document.getElementById(tabId).classList.add('active');
+                
+                // Update content when switching tabs
+                if (tabId === 'dictionary') {
+                    updateDictionaryView();
+                } else if (tabId === 'flashcards') {
+                    updateFlashcardsView();
+                }
+            });
+        });
+
+        // Text area functionality
+        const textArea = document.querySelector('.text-area');
+        const readingText = document.querySelector('.reading-text');
+
+        textArea.addEventListener('input', () => {
+            const text = textArea.value;
+            if (text.trim()) {
+                readingText.innerHTML = text.replace(/\n/g, '<br>');
+                readingText.style.display = 'block';
+                textArea.style.display = 'none';
+            }
+        });
+
+        // Text selection and highlighting
+        readingText.addEventListener('mouseup', handleTextSelection);
+
+        function handleTextSelection() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
+                selectedText = selection.toString().trim();
+                selectedRange = selection.getRangeAt(0).cloneRange();
+                showPopup(selectedText, event);
+            }
+        }
+
+        async function showPopup(text, event) {
+            const popup = document.getElementById('popup');
+            const popupText = document.getElementById('popupText');
+            const popupTranslation = document.getElementById('popupTranslation');
+
+            popupText.textContent = text;
+            popupTranslation.innerHTML = '🔄 Переводим...';
+
+            // Position popup
+            popup.style.left = `${event.pageX}px`;
+            popup.style.top = `${event.pageY + 10}px`;
+            popup.style.display = 'block';
+
+            try {
+                // Get translation
+                const translation = await getTranslation(text);
+                popupTranslation.innerHTML = `✅ ${translation}`;
+            } catch (error) {
+                popupTranslation.innerHTML = '❌ Ошибка перевода';
+                console.error('Translation error:', error);
+            }
+        }
+
+        // Popup button events
+        document.getElementById('audioBtn').addEventListener('click', () => {
+            speakText(selectedText);
+        });
+
+        document.getElementById('addToDict').addEventListener('click', async () => {
+            const translation = await getTranslation(selectedText);
+            
+            // Check if already in dictionary
+            const exists = dictionary.some(item => item.text.toLowerCase() === selectedText.toLowerCase());
+            if (!exists) {
+                dictionary.push({
+                    text: selectedText,
+                    translation: translation,
+                    timestamp: Date.now()
+                });
+                
+                // Highlight the text
+                if (selectedRange) {
+                    const span = document.createElement('span');
+                    span.className = 'highlighted';
+                    span.textContent = selectedText;
+                    selectedRange.deleteContents();
+                    selectedRange.insertNode(span);
+                }
+                
+                alert('Added to dictionary!');
+            } else {
+                alert('Already in dictionary!');
+            }
+            
+            document.getElementById('popup').style.display = 'none';
+        });
+
+        document.getElementById('closePopup').addEventListener('click', () => {
+            document.getElementById('popup').style.display = 'none';
+        });
+
+        // Hide popup when clicking elsewhere
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#popup') && !e.target.closest('.reading-text')) {
+                document.getElementById('popup').style.display = 'none';
+            }
+        });
+
+        // Dictionary view
+        function updateDictionaryView() {
+            const grid = document.getElementById('dictionaryGrid');
+            
+            if (dictionary.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Your dictionary is empty</h3>
+                        <p>Start highlighting words in the Text Reader to build your personal dictionary!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = dictionary.map(item => `
+                <div class="dictionary-item">
+                    <h3>${item.text}</h3>
+                    <p>${item.translation}</p>
+                    <button class="btn btn-primary" onclick="speakText('${item.text}')">🔊 Pronounce</button>
+                </div>
+            `).join('');
+        }
+
+        // Flashcards view
+        function updateFlashcardsView() {
+            const container = document.getElementById('flashcardContainer');
+            
+            if (dictionary.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No flashcards available</h3>
+                        <p>Add some words to your dictionary first to start practicing!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const currentWord = dictionary[currentFlashcard] || dictionary[0];
+            const progress = dictionary.length > 0 ? ((currentFlashcard + 1) / dictionary.length) * 100 : 0;
+
+            container.innerHTML = `
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress}%"></div>
+                </div>
+                <div class="flashcard" onclick="flipCard()">
+                    <div class="flashcard-front">
+                        <div>
+                            <h2>${currentWord.text}</h2>
+                            <p>Click to reveal translation</p>
+                        </div>
+                    </div>
+                    <div class="flashcard-back">
+                        <div>
+                            <h2>${currentWord.translation}</h2>
+                            <p>${currentWord.text}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flashcard-controls">
+                    <button class="btn btn-secondary" onclick="previousCard()">← Previous</button>
+                    <button class="btn btn-primary" onclick="speakText('${currentWord.text}')">🔊 Pronounce</button>
+                    <button class="btn btn-success" onclick="nextCard()">Next →</button>
+                </div>
+                <p style="text-align: center; color: #666; margin-top: 20px;">
+                    Card ${currentFlashcard + 1} of ${dictionary.length}
+                </p>
+            `;
+        }
+
+        function flipCard() {
+            const flashcard = document.querySelector('.flashcard');
+            flashcard.classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            currentFlashcard = (currentFlashcard + 1) % dictionary.length;
+            updateFlashcardsView();
+        }
+
+        function previousCard() {
+            currentFlashcard = currentFlashcard > 0 ? currentFlashcard - 1 : dictionary.length - 1;
+            updateFlashcardsView();
+        }
+
+        // Text control functions
+        function pasteFromClipboard() {
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                navigator.clipboard.readText().then(text => {
+                    textArea.value = text;
+                    if (text.trim()) {
+                        readingText.innerHTML = text.replace(/\n/g, '<br>');
+                        readingText.style.display = 'block';
+                        textArea.style.display = 'none';
+                    }
+                }).catch(err => {
+                    // Fallback: show text area for manual paste
+                    textArea.style.display = 'block';
+                    readingText.style.display = 'none';
+                    textArea.focus();
+                    alert('Пожалуйста, вставьте текст вручную (Ctrl+V)');
+                });
+            } else {
+                // Fallback for older browsers
+                textArea.style.display = 'block';
+                readingText.style.display = 'none';
+                textArea.focus();
+                alert('Пожалуйста, вставьте текст вручную (Ctrl+V)');
+            }
+        }
+
+        function clearText() {
+            if (confirm('Вы уверены, что хотите удалить весь текст?')) {
+                textArea.value = '';
+                readingText.innerHTML = '';
+                readingText.style.display = 'none';
+                textArea.style.display = 'block';
+                textArea.focus();
+            }
+        }
+
+        function editText() {
+            // Switch to edit mode
+            const currentText = readingText.innerHTML.replace(/<br>/g, '\n').replace(/<[^>]*>/g, '');
+            textArea.value = currentText;
+            textArea.style.display = 'block';
+            readingText.style.display = 'none';
+            
+            // Show save button, hide edit button
+            document.getElementById('editBtn').style.display = 'none';
+            document.getElementById('saveBtn').style.display = 'inline-flex';
+            
+            textArea.focus();
+        }
+
+        function saveText() {
+            const text = textArea.value;
+            if (text.trim()) {
+                readingText.innerHTML = text.replace(/\n/g, '<br>');
+                readingText.style.display = 'block';
+                textArea.style.display = 'none';
+            } else {
+                readingText.style.display = 'none';
+                textArea.style.display = 'block';
+            }
+            
+            // Show edit button, hide save button
+            document.getElementById('editBtn').style.display = 'inline-flex';
+            document.getElementById('saveBtn').style.display = 'none';
+        }
+
+        // Button event listeners
+        document.getElementById('pasteBtn').addEventListener('click', pasteFromClipboard);
+        document.getElementById('clearBtn').addEventListener('click', clearText);
+        document.getElementById('editBtn').addEventListener('click', editText);
+        document.getElementById('saveBtn').addEventListener('click', saveText);
+
+        // Initialize with demo text
+        window.addEventListener('load', () => {
+            const demoText = `Welcome to the Language Learning Tool! This interactive app helps you learn new vocabulary by highlighting words and phrases. You can select any text to see its translation feature in action. Try selecting the word "language" or any phrase like "learning tool" to begin your journey. The app makes learning fun and effective by letting you build your personal dictionary and practice them using flashcards. Start by highlighting any word in this text to begin!`;
+            
+            textArea.value = demoText;
+            readingText.innerHTML = demoText;
+            readingText.style.display = 'block';
+            textArea.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

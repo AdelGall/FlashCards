@@ -1,1 +1,3 @@
 # FlashCards
+
+Welcome to the Language Learning Tool! This interactive app helps you learn new vocabulary by highlighting words and phrases. You can select any text to see its translation feature in action. Try selecting the word "language" or any phrase like "learning tool" to begin your journey. The app makes learning fun and effective by letting you build your personal dictionary and practice them using flashcards. 
